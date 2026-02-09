@@ -1,0 +1,16 @@
+# Maven
+target/
+
+# IDE (VS Code)
+.vscode/
+*.code-workspace
+
+#OS/System files
+.DS_Store
+Thumbs.db
+
+# logs
+*.log 
+
+# Compiled Java
+.class
