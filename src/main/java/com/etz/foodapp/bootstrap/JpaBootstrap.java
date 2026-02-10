@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 import com.etz.foodapp.auth.Role;
 import com.etz.foodapp.auth.User;
+import com.etz.foodapp.common.jpa.EntityManagerProvider;
 import com.etz.foodapp.menu.Menu;
 import com.etz.foodapp.menu.MenuItem;
 import com.etz.foodapp.order.Order;
@@ -13,17 +14,13 @@ import com.etz.foodapp.order.OrderSource;
 import com.etz.foodapp.vendor.Vendor;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 
 public class JpaBootstrap {
     
     public static void main(String[] args) {
-
-        EntityManagerFactory emf = 
-                Persistence.createEntityManagerFactory("play");
         
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = 
+                EntityManagerProvider.createEntityManager();
 
         em.getTransaction().begin();
 
@@ -54,6 +51,6 @@ public class JpaBootstrap {
         em.persist(order);
         em.persist(oi);
         em.close();
-        emf.close();
+        EntityManagerProvider.shutdown();
     }
 }
