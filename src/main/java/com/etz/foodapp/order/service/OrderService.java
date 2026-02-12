@@ -13,6 +13,7 @@ import com.etz.foodapp.order.OrderItem;
 import com.etz.foodapp.order.OrderSource;
 import com.etz.foodapp.order.repository.OrderItemRepository;
 import com.etz.foodapp.order.repository.OrderRepository;
+import com.etz.foodapp.vendor.Vendor;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
@@ -71,11 +72,13 @@ public class OrderService {
             Order order = new Order(
                     user, 
                     em.getReference(
-                        com.etz.foodapp.vendor.Vendor.class, 
+                        Vendor.class, 
                         vendorId
                     ),
                     customNote, 
-                    OrderSource.EMPLOYEE
+                    OrderSource.EMPLOYEE,
+                    timeProvider.currentDate(),
+                    timeProvider.currentDateTime()
             );
 
             orderRepo.save(order);
