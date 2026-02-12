@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.etz.foodapp.attendance.ClockInRecordRepository;
 import com.etz.foodapp.auth.User;
+import com.etz.foodapp.common.time.TimeProvider;
 import com.etz.foodapp.menu.MenuItem;
 import com.etz.foodapp.order.Order;
 import com.etz.foodapp.order.OrderItem;
@@ -19,9 +20,11 @@ import jakarta.persistence.EntityTransaction;
 public class OrderService {
     
     private final EntityManager em;
+    private final TimeProvider timeProvider;
 
-    public OrderService(EntityManager em) {
+    public OrderService(EntityManager em, TimeProvider timeProvider) {
         this.em = em;
+        this.timeProvider = timeProvider;
     }
 
     public void placeOrder(
@@ -39,7 +42,7 @@ public class OrderService {
             ClockInRecordRepository clockRepo = new ClockInRecordRepository(em);
 
             boolean clockedIn = clockRepo 
-                        .findByUserAndDate(user.getId(), LocalDate.now())
+                        .findByUserAndDate(user.getId(), timeProvider.currentDate())
                         .isPresent();
 
             if (!clockedIn) {
@@ -49,7 +52,7 @@ public class OrderService {
             OrderRepository orderRepo = new OrderRepository(em);
             OrderItemRepository itemRepo = new OrderItemRepository(em);
 
-            if (LocalTime.now().isAfter(LocalTime.of(9, 0))) {
+            if (timeProvider.currentTime().isAfter(LocalTime.of(9, 0))) {
                 throw new IllegalStateException("Orders are closed for today.");
             }
 

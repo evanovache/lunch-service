@@ -54,13 +54,18 @@ public class Order {
 
     protected Order() {}
 
-    public Order(User user, Vendor vendor, String customNote, OrderSource source) {
+    public Order(User user, 
+                 Vendor vendor, 
+                 String customNote, 
+                 OrderSource source,
+                 LocalDate date,
+                 LocalDateTime dateTime) {
         this.user = user; 
         this.vendor = vendor;
         this.customNote = customNote;
         this.source = source; 
-        this.orderDate = LocalDate.now();
-        this.orderTime = LocalDateTime.now();
+        this.orderDate = date;
+        this.orderTime = dateTime;
     }
 
     public Long getId() {
