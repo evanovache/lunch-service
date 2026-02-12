@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import com.etz.foodapp.attendance.ClockInRecordRepository;
 import com.etz.foodapp.auth.User;
 import com.etz.foodapp.menu.MenuItem;
 import com.etz.foodapp.order.Order;
@@ -34,6 +35,16 @@ public class OrderService {
 
         try {
             tx.begin();
+
+            ClockInRecordRepository clockRepo = new ClockInRecordRepository(em);
+
+            boolean clockedIn = clockRepo 
+                        .findByUserAndDate(user.getId(), LocalDate.now())
+                        .isPresent();
+
+            if (!clockedIn) {
+                throw new IllegalStateException("User must clock in before ordering");
+            }
 
             OrderRepository orderRepo = new OrderRepository(em);
             OrderItemRepository itemRepo = new OrderItemRepository(em);
