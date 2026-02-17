@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
 public class SystemTimeProvider implements TimeProvider {
     
     @Override 

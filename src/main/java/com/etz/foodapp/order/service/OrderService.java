@@ -20,86 +20,85 @@ import com.etz.foodapp.order.repository.OrderItemRepository;
 import com.etz.foodapp.order.repository.OrderRepository;
 import com.etz.foodapp.vendor.Vendor;
 
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 
+@RequestScoped
 public class OrderService {
     
-    private final EntityManager em;
-    private final TimeProvider timeProvider;
+    @PersistenceContext
+    private EntityManager em;
 
-    public OrderService(EntityManager em, TimeProvider timeProvider) {
-        this.em = em;
-        this.timeProvider = timeProvider;
-    }
+    @Inject
+    private TimeProvider timeProvider;
 
+    @Transactional
     public OrderResponse placeOrder(User user, OrderRequest request) {
 
-        TransactionExecutor txExecutor = new TransactionExecutor(em);
+        ClockInRecordRepository clockRepo = new ClockInRecordRepository(em);
+        OrderRepository orderRepo = new OrderRepository(em);
+        OrderItemRepository itemRepo = new OrderItemRepository(em);
 
-        return txExecutor.execute(entityManager -> {
-
-            ClockInRecordRepository clockRepo = new ClockInRecordRepository(entityManager);
-            OrderRepository orderRepo = new OrderRepository(entityManager);
-            OrderItemRepository itemRepo = new OrderItemRepository(entityManager);
-
-            boolean clockedIn = clockRepo 
-                        .findByUserAndDate(user.getId(), timeProvider.currentDate())
-                        .isPresent();
-
-            if (!clockedIn) {
-                throw new IllegalStateException("User must clock in before ordering");
-            }
-
-            if (timeProvider.currentTime().isAfter(LocalTime.of(9, 0))) {
-                throw new IllegalStateException("Orders are closed for today.");
-            }
-
-            boolean exists = orderRepo 
-                    .findByUserAndVendorAndDate(
-                        user.getId(), 
-                        request.getVendorId(), 
-                        timeProvider.currentDate()
-                    )
+        boolean clockedIn = clockRepo 
+                    .findByUserAndDate(user.getId(), timeProvider.currentDate())
                     .isPresent();
 
-            if (exists) {
-                throw new IllegalStateException("Order already placed.");
-            }
+        if (!clockedIn) {
+            throw new IllegalStateException("User must clock in before ordering");
+        }
 
-            var vendorRef = entityManager.getReference(
-                                    Vendor.class,
-                                    request.getVendorId());
+        if (timeProvider.currentTime().isAfter(LocalTime.of(9, 0))) {
+            throw new IllegalStateException("Orders are closed for today.");
+        }
 
-            Order order = new Order(
-                    user, 
-                    vendorRef,
-                    request.getCustomNote(),
-                    OrderSource.EMPLOYEE,
-                    timeProvider.currentDate(),
-                    timeProvider.currentDateTime()
+        boolean exists = orderRepo 
+                .findByUserAndVendorAndDate(
+                    user.getId(), 
+                    request.getVendorId(), 
+                    timeProvider.currentDate()
+                )
+                .isPresent();
+
+        if (exists) {
+            throw new IllegalStateException("Order already placed.");
+        }
+
+        var vendorRef = em.getReference(
+                                Vendor.class,
+                                request.getVendorId());
+
+        Order order = new Order(
+                user, 
+                vendorRef,
+                request.getCustomNote(),
+                OrderSource.EMPLOYEE,
+                timeProvider.currentDate(),
+                timeProvider.currentDateTime()
+        );
+
+        orderRepo.save(order);
+
+        for (OrderItemRequest itemRequest : request.getItems()) {
+
+            MenuItem menuItem = em.find(
+                MenuItem.class, itemRequest.getMenuItemId()
             );
 
-            orderRepo.save(order);
+            OrderItem orderItem = new OrderItem(
+                    order, 
+                    menuItem, 
+                    itemRequest.getQuantity()
+            );
 
-            for (OrderItemRequest itemRequest : request.getItems()) {
+            itemRepo.save(orderItem);
+        }
 
-                MenuItem menuItem = entityManager.find(
-                    MenuItem.class, itemRequest.getMenuItemId()
-                );
+        em.flush();
 
-                OrderItem orderItem = new OrderItem(
-                        order, 
-                        menuItem, 
-                        itemRequest.getQuantity()
-                );
-
-                itemRepo.save(orderItem);
-            }
-
-            entityManager.flush();
-
-            return mapToResponse(order, entityManager);
-        });           
+        return mapToResponse(order, em);          
     }
 
 
