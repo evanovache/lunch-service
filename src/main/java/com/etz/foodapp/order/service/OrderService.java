@@ -94,9 +94,6 @@ public class OrderService {
 
             itemRepo.save(orderItem);
         }
-
-        em.flush();
-
         return mapToResponse(order, em);          
     }
 

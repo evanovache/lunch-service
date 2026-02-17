@@ -1,7 +1,6 @@
 package com.etz.foodapp.order.api;
 
 import com.etz.foodapp.auth.User;
-import com.etz.foodapp.common.jpa.EntityManagerProvider;
 import com.etz.foodapp.order.dto.OrderRequest;
 import com.etz.foodapp.order.dto.OrderResponse;
 import com.etz.foodapp.order.service.OrderService;
@@ -31,10 +30,7 @@ public class OrderResource {
     
     @POST 
     public Response placeOrder(OrderRequest request) {
-
-        EntityManager em = EntityManagerProvider.createEntityManager();
-
-        
+  
         User user = em.find(User.class, 1L);
 
         OrderResponse response = orderService.placeOrder(user, request);

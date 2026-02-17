@@ -5,7 +5,7 @@
              https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
              version="3.0">
 
-    <persistence-unit name="play" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="play" transaction-type="JTA">
 
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
