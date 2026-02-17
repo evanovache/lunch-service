@@ -1,0 +1,11 @@
+POST /api/orders
+Content-Type: application/json
+
+{
+  "vendorId": 1,
+  "customNote": "Extra pepper",
+  "items": [
+    { "menuItemId": 1, "quantity": 2 },
+    { "menuItemId": 2, "quantity": 1 }
+  ]
+}
