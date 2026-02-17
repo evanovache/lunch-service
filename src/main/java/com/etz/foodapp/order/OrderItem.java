@@ -46,4 +46,16 @@ public class OrderItem {
     public Long getId() {
         return id;
     }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public BigDecimal getPriceAtOrderTime() {
+        return priceAtOrderTime;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
 }
