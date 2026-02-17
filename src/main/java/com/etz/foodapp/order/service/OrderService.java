@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.etz.foodapp.attendance.ClockInRecordRepository;
 import com.etz.foodapp.auth.User;
-import com.etz.foodapp.common.jpa.TransactionExecutor;
 import com.etz.foodapp.common.time.TimeProvider;
 import com.etz.foodapp.menu.MenuItem;
 import com.etz.foodapp.order.Order;
